@@ -12,6 +12,7 @@ from .fixed_queries import FIXED_QUERIES
 from .langgraph_workflow import run_workflow, get_route_for_query
 from .agents.pdf_agent_wrapper import stream_pdf_agent
 from .memory import SharedMemory
+from .evaluation_api import router as evaluation_router
 
 class EndpointFilter(logging.Filter):
     def filter(self, record):
@@ -19,7 +20,7 @@ class EndpointFilter(logging.Filter):
 
 logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
 
-app = FastAPI(title="SPB AI Dispatch Assistant API", version="1.0.0")
+app = FastAPI(title="LLM Evaluation Tool API", version="1.0.0")
 
 # CORS middleware for frontend access
 # For production, replace ["*"] with specific domains
@@ -30,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include evaluation API router
+app.include_router(evaluation_router)
 
 
 class ComparisonItem(BaseModel):
@@ -250,7 +254,7 @@ MOCK_RESPONSES = {
 
 @app.get("/")
 async def root():
-    return {"message": "SPB AI Dispatch Assistant API", "version": "1.0.0"}
+    return {"message": "LLM Evaluation Tool API", "version": "1.0.0"}
 
 
 @app.get("/api/ai-overview", response_model=AIAssistantOverview)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 SPPC API Comparison Test Suite - Main Entry Point
 
@@ -23,6 +24,11 @@ import sys
 import argparse
 import webbrowser
 from datetime import datetime
+
+# Fix Windows console encoding for Unicode/emoji support
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

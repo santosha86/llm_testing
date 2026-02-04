@@ -1,0 +1,227 @@
+{
+  "reportId": "eval-2026-02-04-001",
+  "reportDate": "2026-02-04T10:30:00Z",
+  "reportTitle": "LLM Capability Evaluation - Customer API Assessment",
+
+  "baselineProvider": "OpenAI GPT-4",
+  "customerProvider": "Customer LLM API",
+
+  "overallBaseline": 94,
+  "overallCustomer": 42,
+
+  "categoryScores": [
+    {
+      "category": "Mathematical Calculations",
+      "baselineScore": 85,
+      "customerScore": 35,
+      "gap": -50,
+      "icon": "calculator",
+      "totalTests": 6,
+      "baselinePassed": 5,
+      "customerPassed": 2
+    },
+    {
+      "category": "Multi-Condition Logic",
+      "baselineScore": 90,
+      "customerScore": 40,
+      "gap": -50,
+      "icon": "brain",
+      "totalTests": 6,
+      "baselinePassed": 5,
+      "customerPassed": 2
+    },
+    {
+      "category": "Reasoning",
+      "baselineScore": 88,
+      "customerScore": 45,
+      "gap": -43,
+      "icon": "lightbulb",
+      "totalTests": 6,
+      "baselinePassed": 5,
+      "customerPassed": 3
+    },
+    {
+      "category": "Long-Context Retrieval",
+      "baselineScore": 95,
+      "customerScore": 30,
+      "gap": -65,
+      "icon": "document",
+      "totalTests": 6,
+      "baselinePassed": 6,
+      "customerPassed": 2
+    }
+  ],
+
+  "testResults": [
+    {
+      "id": "MATH-001",
+      "category": "math",
+      "question": "Calculate annual energy output (MWh) for Sakaka Solar project with 300 MW capacity and 24% capacity factor",
+      "expectedAnswer": "630,720 MWh",
+      "baselineResponse": "Annual Energy Output = 300 MW × 8760 hours × 0.24 = 630,720 MWh",
+      "customerResponse": "The annual energy output would be approximately 600,000 MWh",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 1.2,
+      "customerLatency": 3.5,
+      "failureReason": "Incorrect calculation - off by 5%"
+    },
+    {
+      "id": "MATH-002",
+      "category": "math",
+      "question": "Calculate total annual revenue in SAR across all 10 projects",
+      "expectedAnswer": "284,570,554 SAR",
+      "baselineResponse": "Total annual revenue across all projects: 284,570,554 SAR",
+      "customerResponse": "The total revenue is around 280 million SAR",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 2.1,
+      "customerLatency": 4.2,
+      "failureReason": "Imprecise - rounded instead of exact calculation"
+    },
+    {
+      "id": "MATH-003",
+      "category": "math",
+      "question": "Rank projects by revenue per MW of installed capacity (top 3)",
+      "expectedAnswer": "1. Dumat Al-Jandal Wind (265,056 SAR/MW), 2. Sakaka Solar (184,320 SAR/MW), 3. Qurrayat Solar (37,318 SAR/MW)",
+      "baselineResponse": "Top 3 by Revenue/MW: 1. Dumat Al-Jandal Wind: 265,056 SAR/MW, 2. Sakaka Solar: 184,320 SAR/MW, 3. Qurrayat Solar: 37,318 SAR/MW",
+      "customerResponse": "The top projects by efficiency are Dumat Al-Jandal, Sakaka, and Sudair",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 2.8,
+      "customerLatency": 3.1,
+      "failureReason": "Wrong ranking - included Sudair instead of Qurrayat"
+    },
+    {
+      "id": "MATH-004",
+      "category": "math",
+      "question": "Verify the Annual Revenue column for Tabarjal Solar and flag if there's a mismatch",
+      "expectedAnswer": "MISMATCH DETECTED: Listed as 12,345,678 SAR, calculated should be 12,396,600 SAR",
+      "baselineResponse": "I found a mismatch for Tabarjal Solar. Listed revenue: 12,345,678 SAR. Calculated: 400MW × 8760 × 0.25 × 0.0142 × 1000 = 12,396,600 SAR. Difference: 50,922 SAR",
+      "customerResponse": "The revenue for Tabarjal Solar is 12,345,678 SAR as listed in the data.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 3.2,
+      "customerLatency": 2.8,
+      "failureReason": "Failed to detect intentional error in data"
+    },
+    {
+      "id": "LOGIC-001",
+      "category": "logic",
+      "question": "Based on the eligibility rules, which bidders are eligible to participate in Round 7?",
+      "expectedAnswer": "Eligible: Bidder A, Bidder B, Bidder E. Disqualified: Bidder C, Bidder D",
+      "baselineResponse": "Based on the 5 eligibility rules: ELIGIBLE: Bidder A (meets all), Bidder B (meets all), Bidder E (meets all). DISQUALIFIED: Bidder C (local content 28% < 30%), Bidder D (multiple failures)",
+      "customerResponse": "Looking at the bidders, A, B, C, and E appear to meet the requirements.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 2.5,
+      "customerLatency": 2.2,
+      "failureReason": "Incorrectly included Bidder C as eligible"
+    },
+    {
+      "id": "LOGIC-002",
+      "category": "logic",
+      "question": "List ALL the reasons why Bidder D is disqualified",
+      "expectedAnswer": "4 reasons: 1) Local content 25% < 30%, 2) Credit rating BB < BBB, 3) Projects 2 < 3, 4) LTIR 0.6 > 0.5",
+      "baselineResponse": "Bidder D fails on 4 criteria: 1. Local content: 25% (required 30%), 2. Credit rating: BB (required BBB minimum), 3. Completed projects: 2 (required 3), 4. LTIR: 0.6 (max allowed 0.5)",
+      "customerResponse": "Bidder D is disqualified due to low local content percentage and credit rating issues.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 2.1,
+      "customerLatency": 1.9,
+      "failureReason": "Only identified 2 of 4 failure reasons"
+    },
+    {
+      "id": "LOGIC-003",
+      "category": "logic",
+      "question": "Which eligible bidders need to provide an additional performance bond and why?",
+      "expectedAnswer": "Bidder B and Bidder E - both have proposed tariffs below 1.00 SAR/kWh",
+      "baselineResponse": "Bidder B (tariff 0.95 SAR/kWh) and Bidder E (tariff 0.88 SAR/kWh) need additional performance bonds because their proposed tariffs are below 1.00 SAR/kWh per Section 2 rules.",
+      "customerResponse": "Bidder E needs a performance bond due to the low tariff offer.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 1.8,
+      "customerLatency": 2.0,
+      "failureReason": "Missed Bidder B who also requires bond"
+    },
+    {
+      "id": "CONTEXT-001",
+      "category": "long-context",
+      "question": "When did the ECRA regulatory framework become effective?",
+      "expectedAnswer": "March 15, 2023",
+      "baselineResponse": "According to Section 1.2, the framework became effective on March 15, 2023, replacing all previous renewable energy guidelines.",
+      "customerResponse": "The ECRA framework was implemented in 2023.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 1.5,
+      "customerLatency": 2.8,
+      "failureReason": "Imprecise - gave year only, not specific date"
+    },
+    {
+      "id": "CONTEXT-002",
+      "category": "long-context",
+      "question": "What is the Saudi Vision 2030 renewable energy target mentioned in the document?",
+      "expectedAnswer": "58.7 GW of renewable energy capacity by 2030",
+      "baselineResponse": "Saudi Vision 2030 targets 58.7 GW of renewable energy capacity by 2030, as stated in Part VI, Chapter 15.2.",
+      "customerResponse": "Saudi Arabia aims for significant renewable energy growth by 2030.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 2.2,
+      "customerLatency": 3.5,
+      "failureReason": "Failed to retrieve specific figure from end of document"
+    },
+    {
+      "id": "CONTEXT-003",
+      "category": "long-context",
+      "question": "Does the document mention any hydrogen production targets?",
+      "expectedAnswer": "No - hydrogen is not mentioned in the document",
+      "baselineResponse": "No, the ECRA regulatory framework document does not mention hydrogen production targets. The document focuses on solar PV, CSP, wind, and hybrid renewable systems.",
+      "customerResponse": "The document mentions hydrogen as part of the future energy mix with targets of 4 million tons by 2030.",
+      "baselinePass": true,
+      "customerPass": false,
+      "baselineLatency": 3.0,
+      "customerLatency": 2.5,
+      "failureReason": "HALLUCINATION - fabricated hydrogen targets not in document"
+    }
+  ],
+
+  "criticalFailures": [
+    "Math Accuracy: Customer LLM fails 65% of numerical calculations, providing approximate values instead of exact figures",
+    "Hallucination Detected: Fabricated hydrogen production targets that do not exist in source documents",
+    "Context Loss: Cannot accurately retrieve information from beyond first 20% of long documents",
+    "Logic Errors: Fails to apply multiple AND conditions correctly, missing 2+ rule violations",
+    "Validation Gap: Does not detect intentional errors in source data (Tabarjal revenue mismatch)"
+  ],
+
+  "recommendations": [
+    {
+      "type": "critical",
+      "title": "Do Not Use for Financial Calculations",
+      "description": "Customer LLM shows 65% failure rate on mathematical calculations. This makes it unsuitable for any financial or numerical analysis tasks.",
+      "action": "Use baseline LLM (GPT-4) for all calculation-heavy use cases"
+    },
+    {
+      "type": "critical",
+      "title": "Hallucination Risk",
+      "description": "Customer LLM fabricated information that doesn't exist in source documents. This poses significant risk for compliance and regulatory use cases.",
+      "action": "Implement strict fact-checking layer or avoid using for document Q&A"
+    },
+    {
+      "type": "warning",
+      "title": "Long Document Limitations",
+      "description": "Performance degrades significantly for documents longer than ~5,000 tokens. Information at end of documents is often missed.",
+      "action": "Chunk long documents or use baseline LLM for long-context retrieval"
+    },
+    {
+      "type": "info",
+      "title": "Potential for Fine-tuning",
+      "description": "Customer LLM shows reasonable latency. With domain-specific fine-tuning, performance may improve.",
+      "action": "Consider fine-tuning pilot with curated SPPC domain data"
+    }
+  ],
+
+  "avgBaselineLatency": 2.24,
+  "avgCustomerLatency": 2.85,
+  "totalTestsRun": 18,
+  "testDuration": 145.5
+}
