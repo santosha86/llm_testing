@@ -1,0 +1,11 @@
+Project_Name,Location,Capacity_MW,Capacity_Factor,Tariff_SAR_kWh,Annual_Revenue_SAR,COD_Year,Technology,Status
+Sakaka Solar,Al-Jouf,300,0.24,0.0877,55296000,2021,Solar PV,Operational
+Dumat Al-Jandal Wind,Al-Jouf,400,0.42,0.0719,106022400,2022,Wind,Operational
+Rabigh Solar,Makkah,300,0.26,0.0161,10935600,2022,Solar PV,Operational
+Jeddah Solar,Makkah,300,0.25,0.0164,10783200,2023,Solar PV,Operational
+Qurrayat Solar,Northern Border,200,0.27,0.0158,7463520,2023,Solar PV,Operational
+Madinah Solar,Madinah,50,0.23,0.0159,1602828,2023,Solar PV,Operational
+Sudair Solar,Riyadh,1500,0.25,0.0104,34164000,2024,Solar PV,Construction
+Shuaibah Solar,Makkah,600,0.26,0.0119,16205040,2024,Solar PV,Construction
+Ar Rass Solar,Qassim,700,0.24,0.0134,19656288,2024,Solar PV,Construction
+Tabarjal Solar,Al-Jouf,400,0.25,0.0142,12345678,2024,Solar PV,Planned
