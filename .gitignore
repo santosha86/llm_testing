@@ -1,0 +1,44 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+
+# Vector DB (can be regenerated)
+backend/pdf_agent/chroma_langchain_db/
+
+# Large data files (optional - comment out if you want to include)
+# *.db
+# *.csv
+# *.xlsx
+
+# Environment files with secrets
+# .env.local
+
+# Temp files
+nul
