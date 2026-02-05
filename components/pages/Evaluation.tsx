@@ -238,46 +238,65 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
             <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Test ID</th>
+                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase w-24">Test ID</th>
                   <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Question</th>
-                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Expected</th>
-                  <th className="py-3 px-4 text-center text-xs font-semibold text-gray-600 uppercase">Baseline</th>
-                  <th className="py-3 px-4 text-center text-xs font-semibold text-gray-600 uppercase">Target</th>
+                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase w-32">Expected</th>
+                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase w-80">Baseline Answer</th>
+                  <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase w-80">Target Answer</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {results.map((result) => (
                   <tr key={result.testId} className="hover:bg-gray-50">
-                    <td className="py-4 px-4">
-                      <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{result.testId}</span>
+                    <td className="py-4 px-4 align-top">
+                      <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded block">{result.testId}</span>
                     </td>
-                    <td className="py-4 px-4 max-w-xs">
-                      <p className="text-sm text-gray-900 truncate" title={result.question}>{result.question}</p>
+                    <td className="py-4 px-4 align-top">
+                      <p className="text-sm text-gray-900">{result.question}</p>
+                      <div className="mt-2 text-xs text-gray-500">
+                        <span className="font-semibold">Expected:</span> <code className="bg-gray-100 px-1 py-0.5 rounded">{result.expected}</code>
+                      </div>
                     </td>
-                    <td className="py-4 px-4">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">{result.expected}</code>
+                    <td className="py-4 px-4 align-top">
+                      <code className="text-xs bg-amber-50 px-2 py-1 rounded block">{result.expected}</code>
                     </td>
-                    <td className="py-4 px-4 text-center">
-                      {result.baselinePass !== undefined ? (
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          result.baselinePass ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {result.baselinePass ? 'PASS' : 'FAIL'}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
+                    <td className="py-4 px-4 align-top">
+                      <div className={`p-3 rounded-lg border-2 ${
+                        result.baselinePass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                      }`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-xs font-semibold ${
+                            result.baselinePass ? 'text-green-800' : 'text-red-800'
+                          }`}>
+                            {result.baselinePass ? '✓ PASS' : '✗ FAIL'}
+                          </span>
+                          {result.baselineLatency && (
+                            <span className="text-xs text-gray-500">{Math.round(result.baselineLatency)}ms</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-800 leading-relaxed">
+                          {result.baselineAnswer || 'No answer'}
+                        </p>
+                      </div>
                     </td>
-                    <td className="py-4 px-4 text-center">
-                      {result.targetPass !== undefined ? (
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          result.targetPass ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {result.targetPass ? 'PASS' : 'FAIL'}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
+                    <td className="py-4 px-4 align-top">
+                      <div className={`p-3 rounded-lg border-2 ${
+                        result.targetPass ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                      }`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-xs font-semibold ${
+                            result.targetPass ? 'text-green-800' : 'text-red-800'
+                          }`}>
+                            {result.targetPass ? '✓ PASS' : '✗ FAIL'}
+                          </span>
+                          {result.targetLatency && (
+                            <span className="text-xs text-gray-500">{Math.round(result.targetLatency)}ms</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-800 leading-relaxed">
+                          {result.targetAnswer || 'No answer'}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ))}
