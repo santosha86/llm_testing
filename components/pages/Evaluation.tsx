@@ -43,6 +43,32 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
     setIsRunning(true);
     setResults([]);
 
+    // Validate configs are properly set
+    const baselineStr = localStorage.getItem('llm_eval_baseline');
+    const targetStr = localStorage.getItem('llm_eval_target');
+
+    if (!baselineStr || !targetStr) {
+      alert('❌ Configuration Required!\n\nPlease configure both Baseline and Target models in the Configuration tab first.');
+      setIsRunning(false);
+      return;
+    }
+
+    const baseline = JSON.parse(baselineStr);
+    const target = JSON.parse(targetStr);
+
+    // Validate required fields
+    if (!baseline.type || !baseline.model || (baseline.type === 'openai' && !baseline.apiKey)) {
+      alert('❌ Baseline Model Incomplete!\n\nPlease configure your Baseline model (OpenAI API key required).');
+      setIsRunning(false);
+      return;
+    }
+
+    if (!target.type || !target.model) {
+      alert('❌ Target Model Incomplete!\n\nPlease configure your Target model in the Configuration tab.');
+      setIsRunning(false);
+      return;
+    }
+
     const categoryInfo = categories.find(c => c.id === category)!;
     setProgress({ current: 0, total: categoryInfo.tests, currentTest: 'Initializing...' });
 
@@ -51,14 +77,12 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
       const response = await fetch(`${apiUrl}/api/evaluation/run/${category}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          baseline: JSON.parse(localStorage.getItem('llm_eval_baseline') || '{}'),
-          target: JSON.parse(localStorage.getItem('llm_eval_target') || '{}'),
-        }),
+        body: JSON.stringify({ baseline, target }),
       });
 
       if (!response.ok) {
-        throw new Error('Evaluation failed');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || errorData.summary?.error || 'Evaluation failed');
       }
 
       const data = await response.json();
@@ -69,12 +93,14 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
       // Set results from backend
       setResults(data.results);
 
-      // Save results to localStorage for Reports page
+      // Save results with model metadata to localStorage
       const allResults = JSON.parse(localStorage.getItem('llm_eval_results') || '[]');
       const newRun = {
         id: Date.now(),
         category,
         timestamp: new Date().toISOString(),
+        baselineModel: `${baseline.type}:${baseline.model}`,
+        targetModel: `${target.type}:${target.model}`,
         results: data.results,
         summary: data.summary,
       };
@@ -82,9 +108,9 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
 
       if (onComplete) onComplete(data.results);
     } catch (error) {
-      console.error('Backend evaluation failed, using simulation:', error);
-      // Simulate results for demo when backend not available
-      await simulateEvaluation(category);
+      console.error('Evaluation failed:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      alert(`❌ Evaluation Failed!\n\n${errorMsg}\n\nPlease check:\n1. Backend is running (port 8001)\n2. API keys are correct\n3. Models are accessible`);
     }
 
     setIsRunning(false);
