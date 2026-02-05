@@ -31,6 +31,7 @@ class ProviderConfig(BaseModel):
 class EvaluationRequest(BaseModel):
     baseline: ProviderConfig
     target: ProviderConfig
+    useCachedTarget: Optional[bool] = False
 
 
 class TestResult(BaseModel):
@@ -210,10 +211,27 @@ async def run_evaluation(category: str, request: EvaluationRequest):
     # Load test data
     data_context = load_test_data()
 
+    # Cache file path
+    cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    target_model_id = f"{request.target.type}_{request.target.model}".replace(":", "_").replace("/", "_")
+    cache_file = os.path.join(cache_dir, f"{category}_{target_model_id}.json")
+
+    # Load cached target results if requested
+    cached_target_results = {}
+    if request.useCachedTarget and os.path.exists(cache_file):
+        try:
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+                cached_target_results = {r["testId"]: r for r in cache_data}
+        except:
+            pass  # Ignore cache errors
+
     # Create LLM instances
     try:
         baseline_llm = get_llm_for_config(request.baseline)
-        target_llm = get_llm_for_config(request.target)
+        # Only create target LLM if we need to run it
+        target_llm = None if (request.useCachedTarget and cached_target_results) else get_llm_for_config(request.target)
     except Exception as e:
         return EvaluationResponse(
             status="error",
@@ -225,13 +243,31 @@ async def run_evaluation(category: str, request: EvaluationRequest):
     results = []
     baseline_passed = 0
     target_passed = 0
+    target_results_for_cache = []
 
     for test in tests:
-        # Run baseline
+        # Always run baseline fresh
         baseline_result = run_single_test(baseline_llm, test, data_context)
 
-        # Run target
-        target_result = run_single_test(target_llm, test, data_context)
+        # Use cached or run target
+        if request.useCachedTarget and test["testId"] in cached_target_results:
+            # Use cached result
+            cached = cached_target_results[test["testId"]]
+            target_result = {
+                "answer": cached["answer"],
+                "latency": cached["latency"],
+                "passed": cached["passed"]
+            }
+        else:
+            # Run target
+            target_result = run_single_test(target_llm, test, data_context)
+            # Save for cache
+            target_results_for_cache.append({
+                "testId": test["testId"],
+                "answer": target_result["answer"],
+                "latency": target_result["latency"],
+                "passed": target_result["passed"]
+            })
 
         if baseline_result["passed"]:
             baseline_passed += 1
@@ -250,6 +286,14 @@ async def run_evaluation(category: str, request: EvaluationRequest):
             baselineLatency=baseline_result["latency"],
             targetLatency=target_result["latency"]
         ))
+
+    # Save target results to cache if we ran them
+    if target_results_for_cache:
+        try:
+            with open(cache_file, 'w') as f:
+                json.dump(target_results_for_cache, f)
+        except:
+            pass  # Ignore cache write errors
 
     total = len(tests)
     summary = {

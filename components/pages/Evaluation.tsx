@@ -25,11 +25,25 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
   const [progress, setProgress] = useState({ current: 0, total: 0, currentTest: '' });
   const [results, setResults] = useState<TestResult[]>([]);
   const [hasConfig, setHasConfig] = useState(false);
+  const [showModelSelector, setShowModelSelector] = useState(false);
+  const [selectedBaseline, setSelectedBaseline] = useState('');
+  const [selectedTarget, setSelectedTarget] = useState('');
+  const [useCachedTarget, setUseCachedTarget] = useState(false);
 
   useEffect(() => {
     const baseline = localStorage.getItem('llm_eval_baseline');
     const target = localStorage.getItem('llm_eval_target');
     setHasConfig(!!baseline && !!target);
+
+    // Set default selections
+    if (baseline) {
+      const b = JSON.parse(baseline);
+      setSelectedBaseline(`${b.type}:${b.model}`);
+    }
+    if (target) {
+      const t = JSON.parse(target);
+      setSelectedTarget(`${t.type}:${t.model}`);
+    }
   }, []);
 
   const categories: { id: Category; name: string; icon: string; tests: number; description: string }[] = [
@@ -77,7 +91,11 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
       const response = await fetch(`${apiUrl}/api/evaluation/run/${category}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ baseline, target }),
+        body: JSON.stringify({
+          baseline,
+          target,
+          useCachedTarget: useCachedTarget
+        }),
       });
 
       if (!response.ok) {
@@ -195,6 +213,50 @@ const Evaluation: React.FC<EvaluationProps> = ({ onComplete }) => {
           <p className="text-amber-800">
             <strong>Configuration Required:</strong> Please configure your baseline and target models in the Configuration tab first.
           </p>
+        </div>
+      )}
+
+      {/* Model Selection */}
+      {hasConfig && (
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Model Selection</h3>
+            <span className="text-xs text-gray-500">Choose models to compare</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Baseline Model */}
+            <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+              <label className="block text-sm font-semibold text-green-800 mb-2">
+                Baseline Model (Always runs fresh)
+              </label>
+              <div className="bg-white p-3 rounded border border-green-300">
+                <code className="text-sm text-green-900">{selectedBaseline || 'Not configured'}</code>
+              </div>
+              <p className="text-xs text-green-700 mt-2">Reference model - runs every time</p>
+            </div>
+
+            {/* Target Model */}
+            <div className="border-2 border-red-200 rounded-lg p-4 bg-red-50">
+              <label className="block text-sm font-semibold text-red-800 mb-2">
+                Target Model (Can use cache)
+              </label>
+              <div className="bg-white p-3 rounded border border-red-300 mb-3">
+                <code className="text-sm text-red-900">{selectedTarget || 'Not configured'}</code>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useCachedTarget}
+                  onChange={(e) => setUseCachedTarget(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm text-red-700">
+                  Use cached results (faster, saves API calls)
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
       )}
 
